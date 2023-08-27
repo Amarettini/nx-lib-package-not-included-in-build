@@ -1,3 +1,45 @@
+# Help needed with Nx
+This demo repository recreates the runtime error message ive been struggling with trying to resolve.
+Commands and steps that led to this point:
+
+- `nx generate @nx/js:lib is-even`; test-runner: none; bundler: tsc;
+- `nx generate @nx/js:lib is-odd`; test-runner: none; bunder: tsc;
+- `nx build is-even`; build succeeded
+- `npm install -D @nx/node`;
+- `nx g @nx/node:app launcher`; framework: none;
+- `nx serve launcher`; build succeeded; runtime error stack trace: 
+```
+C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\node_modules\@nx\js\src\executors\node\node-with-require-overrides.js:15
+        return originalLoader.apply(this, newArguments);
+                              ^
+Error [ERR_REQUIRE_ESM]: require() of ES Module C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\dist\libs\is-even\src\index.js from C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\dist\apps\launcher\apps\launcher\src\main.js not supported.
+Instead change the require of index.js in C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\dist\apps\launcher\apps\launcher\src\main.js to a dynamic import() which is available in all CommonJS modules.
+    at Module._load (C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\node_modules\@nx\js\src\executors\node\node-with-require-overrides.js:15:31)
+    at Object.<anonymous> (C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\dist\apps\launcher\apps\launcher\src\main.js:1:22)
+    at Module._load (C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\node_modules\@nx\js\src\executors\node\node-with-require-overrides.js:18:31)
+    at Object.<anonymous> (C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\dist\apps\launcher\main.js:42:1)
+    at Module._load (C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\node_modules\@nx\js\src\executors\node\node-with-require-overrides.js:10:31)
+    at async Promise.all (index 0)
+```
+
+Module missmatch between the libs (ESM) and the app (CJS). So i switched `target.build.options.format` in the launchers `project.json` from "cjs" to "esm". Saved and reran again with: 
+
+- `nx serve launcher`; build succeeded; runtime error stack trace ive been fighting with all day...:
+```
+Error: Cannot find package '@nx-lib-package-not-included-in-build/is-even' imported from C:\Users\ppyrz\Dev\Side\nx-lib-package-not-included-in-build\dist\apps\launcher\main.js
+    at new NodeError (node:internal/errors:372:5)
+    at packageResolve (node:internal/modules/esm/resolve:910:9)
+    at moduleResolve (node:internal/modules/esm/resolve:959:20)
+    at defaultResolve (node:internal/modules/esm/resolve:1176:11)
+    at ESMLoader.resolve (node:internal/modules/esm/loader:605:30)
+    at ESMLoader.getModuleJob (node:internal/modules/esm/loader:318:18)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:80:40)
+    at link (node:internal/modules/esm/module_job:78:36)
+```
+
+
+
+
 # NxLibPackageNotIncludedInBuild
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
